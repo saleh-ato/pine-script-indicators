@@ -10,19 +10,28 @@ For any support, You can like or comment on your favorite indicators in My Tradi
 You can also send your donations to the following addresses.
 Thank you for your support.
 
+
+- Bitcoin(BTC)
+```bash
+  1MVqGA8gB5vARdxrWJDw9P3JKtFanq6cAY
+```
 - Ethereum(ETH)
 ```bash
-  0x0f9a4D87F02f50C81B9243b72533929a66Bb4841
+  0xD956491b792b9b385D0ff865a0AcC0bd86864679
 ```
 - Bitcoin Cash(BCH)
 ```bash
-  bitcoincash:qpek7aunkl675f6rp8v0umcgr8s4mwcafskgmm2rwq
+  bitcoincash:qq2kzcu0rrvcwhywpx4ntlwvcj28xcaj9c3muhwepw
+```
+- Doge(DOGE)
+```bash
+  DEZCFErKnNdzTQL2wfHtPB1fE5yXqNvTqZ
+```
+- Litecoin(LTC)
+```bash
+  LPsJCo2FFN1Hn2zh2xs3AvL9gkPhgvnQEM
 ```
 - ZCash(ZEC)
 ```bash
-  t1e9guoDUsUMC4WxbBroqm7ZeEbzRoZ28br
-```
-- tezos(XTZ)
-```bash
-  tz1QpKRmviv93uRA36svG5tcX3XuChpFD5u3
+  t1TrTncuxqXvsDrPcSb9uojfZqAt21C2HAa
 ```
