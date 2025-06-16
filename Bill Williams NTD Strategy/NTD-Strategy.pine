@@ -1,0 +1,115 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Saleh_Toodarvari
+
+//@version=5
+strategy("Bill Williams NTD Strategy", overlay=true, 
+     default_qty_type=strategy.percent_of_equity, default_qty_value=10,
+     initial_capital=100000, currency=currency.USD)
+
+// Create Enable Plot Boolean
+showPlot = input.bool(false, title="Enable Plot") 
+
+//------------------------------------------
+// 1. Calculate Alligator Lines Using RMA (Smoothed MA)
+//    Standard Bill Williams parameters:
+//       Jaw   : Period 13, Offset 8
+//       Teeth : Period 8,  Offset 5
+//       Lips  : Period 5,  Offset 3
+//------------------------------------------
+jawPeriod    = 13
+jawOffset    = 8
+teethPeriod  = 8
+teethOffset  = 5
+lipsPeriod   = 5
+lipsOffset   = 3
+
+jaw    = ta.rma(close, jawPeriod)
+teeth  = ta.rma(close, teethPeriod)
+lips   = ta.rma(close, lipsPeriod)
+
+// Apply offset to the lines (using historical data to compensate for delay)
+jaw_val   = jaw[jawOffset]
+teeth_val = teeth[teethOffset]
+lips_val  = lips[lipsOffset]
+
+//------------------------------------------
+// 2. Calculate Awesome Oscillator (AO)
+//    Difference between the 5-period and 34-period SMA of the median price ((high + low) / 2)
+//------------------------------------------
+ao = ta.sma((high + low) / 2, 5) - ta.sma((high + low) / 2, 34)
+
+//------------------------------------------
+// 3. Calculate Accelerator Oscillator (AC)
+//    Formula: AC = AO - SMA(AO, 5)
+//------------------------------------------
+ac = ao - ta.sma(ao, 5)
+
+//------------------------------------------
+// 4. Identify Fractals (5-Bar Model)
+//    - Bull Fractal: When the middle bar (index 2) has the lowest low in the 5-bar window.
+//    - Bear Fractal: When the middle bar (index 2) has the highest high in the 5-bar window.
+//------------------------------------------
+bullFractalLow  = low[2]  == ta.lowest(low, 5) ? low[2]  : na
+bearFractalHigh = high[2] == ta.highest(high, 5) ? high[2] : na
+
+// Store the latest fractal levels for stop or signal confirmation
+var float lastBullFractalLow  = na  // Suitable as stop loss for long trades
+var float lastBearFractalHigh = na  // Suitable as stop loss for short trades
+
+if not na(bullFractalLow)
+    lastBullFractalLow := bullFractalLow
+if not na(bearFractalHigh)
+    lastBearFractalHigh := bearFractalHigh
+
+//------------------------------------------
+// 5. Define Market Conditions Based on Bill Williams Indicators
+//------------------------------------------
+// Alligator Sequence:
+// - Bullish: Lips > Teeth > Jaw
+// - Bearish: Lips < Teeth < Jaw
+bullAlligator = (lips_val > teeth_val) and (teeth_val > jaw_val)
+bearAlligator = (lips_val < teeth_val) and (teeth_val < jaw_val)
+
+// Conditions for trade entry (only when there is no active position)
+// For a long trade:
+//   • Bullish Alligator alignment
+//   • AO and AC are positive (signifying upward momentum)
+//   • The close is above the last Bear Fractal (serving as a potential breakout level)
+longCondition = bullAlligator and (ao > 0) and (ac > 0) and (not na(lastBearFractalHigh)) and (close > lastBearFractalHigh)
+
+// For a short trade:
+//   • Bearish Alligator alignment
+//   • AO and AC are negative
+//   • The close is below the last Bull Fractal
+shortCondition = bearAlligator and (ao < 0) and (ac < 0) and (not na(lastBullFractalLow)) and (close < lastBullFractalLow)
+
+//------------------------------------------
+// Enter trades only when there is no active position
+//------------------------------------------
+if (longCondition and strategy.position_size == 0)
+    // Set stop loss: Preferably at the last Bull Fractal; if unavailable, use the Jaw line as a fallback.
+    long_stop = not na(lastBullFractalLow) ? lastBullFractalLow : jaw_val
+    risk      = close - long_stop
+    takeProfit= close + risk * 2  // Risk-to-reward ratio of 1:2
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", "Long", stop=long_stop, limit=takeProfit)
+    
+if (shortCondition and strategy.position_size == 0)
+    short_stop = not na(lastBearFractalHigh) ? lastBearFractalHigh : jaw_val
+    risk       = short_stop - close
+    takeProfit = close - risk * 2
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", "Short", stop=short_stop, limit=takeProfit)
+
+//------------------------------------------
+// 6. Plot Alligator Lines and Fractal Markers
+//------------------------------------------
+// Plot Alligator lines
+plot(showPlot ? jaw_val : na,   color=color.blue,  title="Jaw")
+plot(showPlot ? teeth_val : na, color=color.red,   title="Teeth")
+plot(showPlot ? lips_val : na,  color=color.green, title="Lips")
+
+// Mark fractals (using an offset of -2 to account for a 2-bar delay)
+// Bull Fractal (upward triangle) and Bear Fractal (downward triangle)
+plotshape(showPlot ? bullFractalLow : na, title="Bull Fractal Low", style=shape.triangleup, location=location.belowbar, color=color.green, offset=-2, size=size.tiny)
+plotshape(showPlot ? bearFractalHigh : na, title="Bear Fractal High", style=shape.triangledown, location=location.abovebar, color=color.red, offset=-2, size=size.tiny)

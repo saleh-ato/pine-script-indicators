@@ -2,7 +2,7 @@
 # Pinescript indicators
 This GitHub repository is for keeping the source code of the indicators that I have designed in Trading View. Pine script language is used to code these indicators.
 To see my scripts in Trading View, you can refer to the link below.
-<br>Reading the written indicator code will also help you learn Pinascript with the help of examples.
+<br>Reading the written indicator codes will also help you learn Pinascript with the help of examples.
 - https://www.tradingview.com/u/Saleh_Toodarvari/#published-scripts
 ## If you want to support
 

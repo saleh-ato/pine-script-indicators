@@ -58,3 +58,8 @@ fill(sell_sig,tp_sig, color=tpColor)
 fill(buy_sig,tp_sig, color=tpColor)
 fill(buy_sig,sl_sig, color=slColor)
 fill(sell_sig,sl_sig, color=slColor)
+//_________________alerts_________________
+alertConditionBuy=cross_buy and condition_buy
+alertConditionSell=cross_sell and condition_sell
+alertcondition(alertConditionBuy, title='Envelope RSI Buy signal!', message='Buy signal')
+alertcondition(alertConditionSell, title='Envelope RSI Sell signal!', message='Sell signal')
